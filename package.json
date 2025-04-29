@@ -8,6 +8,6 @@
   },
   "dependencies": {
     "chrome-aws-lambda": "^10.1.0",
-    "puppeteer-core": "^21.11.0"
+    "puppeteer": "^24.7.2"
   }
 }
