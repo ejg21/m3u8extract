@@ -1,13 +1,13 @@
 {
-  "name": "m3u8-extractor",
+  "name": "puppeteer-m3u8-finder",
   "version": "1.0.0",
-  "description": "Extract m3u8 links from a webpage using Puppeteer",
+  "description": "Finds m3u8 URLs on a given webpage",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node api/url.js"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "puppeteer": "^21.11.0"
+    "chrome-aws-lambda": "^10.1.0",
+    "puppeteer-core": "^21.11.0"
   }
 }
