@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer');
 
 module.exports = async (req, res) => {
   const fullUrl = req.query.url;
+  const timeout = req.query.timeout || 90000; // Optional custom timeout (default 90 seconds)
 
   if (!fullUrl) {
     return res.status(400).send('Missing "url" query parameter.');
@@ -12,6 +13,8 @@ module.exports = async (req, res) => {
   let responseSent = false;
 
   try {
+    console.log('Initializing Puppeteer with chromium-aws-lambda...');
+
     // Launch Puppeteer with chromium-aws-lambda settings
     browser = await puppeteer.launch({
       args: chromium.args,
@@ -22,12 +25,15 @@ module.exports = async (req, res) => {
 
     const page = await browser.newPage();
 
+    // Set user agent and other HTTP headers
     await page.setUserAgent(
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
     );
 
     await page.setExtraHTTPHeaders({
-      'Accept-Language': 'en-US,en;q=0.9'
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
     });
 
     // Set navigator.webdriver to false to bypass bot detection
@@ -49,7 +55,7 @@ module.exports = async (req, res) => {
           m3u8Urls.push(responseUrl);
           console.log('Found m3u8 URL:', responseUrl);
 
-          // Once a URL is found, send it in the response
+          // Send the response as soon as the first URL is found
           if (!responseSent) {
             responseSent = true;
             const html = `
@@ -72,10 +78,10 @@ module.exports = async (req, res) => {
     // Navigate to the URL and wait until the network is idle
     await page.goto(fullUrl, {
       waitUntil: 'networkidle2',
-      timeout: 90000,
+      timeout: timeout,
     });
 
-    // Fallback if no m3u8 found after 15 seconds
+    // Fallback if no m3u8 found after timeout (default 15 seconds)
     setTimeout(async () => {
       if (!responseSent && m3u8Urls.length === 0) {
         responseSent = true;
